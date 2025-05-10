@@ -1,0 +1,36 @@
+services:
+  appointment-service:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+      - rabbitmq
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/appointments
+      - RABBITMQ_URL=amqp://rabbitmq
+      - PATIENT_SERVICE_URL=http://host.docker.internal:8080  # for local patient service
+    volumes:
+      - .:/app
+    restart: always
+
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5673:5672"
+      - "15673:15672"  # management UI at http://localhost:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+volumes:
+  mongo_data:
